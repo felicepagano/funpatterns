@@ -48,4 +48,25 @@ class ConsoleTest {
         assertThat(stdOut.poll()).equals("8")
     }
 
+    @Test
+    fun `dispense fp`() {
+
+        val fakeReadFile: (String) -> Console<String> = { filename -> Console{ "content inside the file $filename" } }
+        val fakeWriteFile: (String, String) -> Console<Unit> = { filename, data -> Console { println("writing on $filename the $data") }}
+        val log : (String, String) -> Console<String> = { message, param -> Console {
+            println(message)
+            param
+        } }
+
+        val program = fakeReadFile("pippo.txt")
+            .chain { output -> log("the output is $output", output) }
+            .chain { x -> fakeWriteFile("file.txt", x) }
+            .chain { fakeReadFile("file.txt") }
+            .chain { output -> log("the output is $output", output) }
+
+        println("here you have the last read operation $program")
+
+
+    }
+
 }
