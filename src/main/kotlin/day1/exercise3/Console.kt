@@ -15,13 +15,10 @@ data class Console<T>(val exec: () -> T) {
     fun <B> of (t: B): Console<B> = Console { t }
     // chain dovrebbe essere un sinonimo di flatMap
 
-    // TODO: investigare perchè ho bisogno di estrarre exec e wrapparlo in un nuovo console per avere l'effetto lazy
-    fun <B> chain(f: (T) -> Console<B>): Console<B> = Console {
-        (exec andThen f)()()
-    }
+    // Console accetta un thunk quindi per questo andThen non viene eseguito subito
+    fun <B> chain(f: (T) -> Console<B>): Console<B> = Console { (exec andThen f)()() }
 
-    fun <B> chainNonLazy(f: (T) -> Console<B>): Console<B> =
-        (exec andThen f)()
+    fun <B> chainNonLazy(f: (T) -> Console<B>): Console<B> = (exec andThen f)()
 
     // fun <B> map(f: (T) -> B): Console<B> = this.chain { of(f(this.exec())) }
 
